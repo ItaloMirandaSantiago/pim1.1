@@ -1,78 +1,124 @@
 #include <stdio.h>
 #include <string.h>
 
+
+//typedef - semelhante a um objeto em js, sendo uma definição de um tipo de dado,
+// por exemplo, "int", "float", neste caso o tipo de dado é "produto" 
+//struct - serve para agrupar várias variáveis em um único tipo
+
 typedef struct {
     char nome[100];
     float preco;
 } Produto;
 
+
+//função, recebe uma string "nome"
+// retorna 0 se não for encontrado o produto ou se o arquivo não existir e 1 se encontrado
 int verificarNome(const char* nome) {
+    //FILE *file ponteiro para manipular o arquivo Produtos
+    //"r" para abrir em modo leitura
     FILE *file = fopen("Produtos.txt", "r");
     if (file == NULL) {
         return 0;
     }
-    
+    //loop para ler todo o arquivo
+    //linha[150] é para armazenar todas as caracteres da linha
     char linha[150];
+
+    //sizeof(linha) é o tamanho máximo permitido
+
     while (fgets(linha, sizeof(linha), file)) {
+
+        // strstr função interna da linguagem, serve para pegar toda a linha e procurar o nome do produto
+        //se for diferente de null, significa que ele achou, por isso ele retorna 1
         if (strstr(linha, nome) != NULL) {
+
+            //fclose é o fechamento do arquivo
             fclose(file);
             return 1;
         }
     }
+    //produto não achado
     fclose(file);
     return 0;
 }
 
+//recebe uma string
 float buscarPrecoProduto(const char* nomeProduto) {
+    //array de 100 produtos, tendo dentro de cada um deles nome e preço 
     Produto produtos[100];
+    //chamado da função lerProdutos
     int qtdProdutos = lerProdutos(produtos);
 
+    //pecorrer cada elemento
     for (int i = 0; i < qtdProdutos; i++) {
+        //verifica se existe e retorna o preço
         if (strcmp(produtos[i].nome, nomeProduto) == 0) {
             return produtos[i].preco;
         }
     }
-
+//falha - produto não encontrado
     return -1; 
 }
 
 
 
 int lerProdutos(Produto* produtos) {
+    //abre o arquivo
     FILE *file = fopen("Produtos.txt", "r");
     if (file == NULL) {
         printf("Erro ao abrir o arquivo!\n");
         return 0;
     }
-
+    //quantidade de produtos zero
     int qtdProdutos = 0;
+
+   //transforma em string fgts
     while (fgets(produtos[qtdProdutos].nome, sizeof(produtos[qtdProdutos].nome), file) != NULL) {
+
+        //extrai as informações de cada produto
+        //produtos[qtdProdutos].nome fica após o Nome: e ele pega essa informção
         sscanf(produtos[qtdProdutos].nome, "Nome: %[^,], Preço: %f", produtos[qtdProdutos].nome, &produtos[qtdProdutos].preco);
+        
+        //a cada produto lido ele acrescenta um em qtdProdutos, para ler o próximo
+
         qtdProdutos++;
     }
+    //fecha arquivo e retornar a quantidade de arquivos lidos
     fclose(file);
     return qtdProdutos;
 }
 
-
+// não retorna nada e pega um numero e o objeto produtos, contendo nome e preço
 void salvarProdutos(Produto* produtos, int qtdProdutos) {
+    //abre o arquivo em modo escrita
     FILE *file = fopen("Produtos.txt", "w");
+
+    //verifca se o arquivo existe
     if (file == NULL) {
         printf("Erro ao abrir o arquivo para salvar!\n");
         return;
     }
 
+    //escreve os dados de todos os produtos, dnv e atualiza
     for (int i = 0; i < qtdProdutos; i++) {
         fprintf(file, "Nome: %s, Preço: %.2f\n", produtos[i].nome, produtos[i].preco);
     }
+    //fecha
     fclose(file);
 }
 
+
+//não retorna nada
 void listarProdutos() {
     Produto produtos[100];
+
+    //ler produtos
     int qtdProdutos = lerProdutos(produtos);
 
+    //mostra na tela todos os produtos
     printf("Lista de Produtos:\n");
+    
     for (int i = 0; i < qtdProdutos; i++) {
         printf("Nome: %s, Preço: %.2f\n", produtos[i].nome, produtos[i].preco);
     }
